@@ -35,8 +35,8 @@
 #define GPIO_PIN       18
 #define DMA            10
 
-#define WIDTH          8
-#define HEIGHT         8
+#define WIDTH          4
+#define HEIGHT         16
 #define LED_COUNT      (WIDTH * HEIGHT)
 
 ws2811_t ledstring =
@@ -50,7 +50,8 @@ ws2811_t ledstring =
             .gpionum    = GPIO_PIN,
             .count      = LED_COUNT,
             .invert     = 0,
-            .brightness = 55,
+            .brightness = 255,
+			.strip_type = SK6812_STRIP_RGBW,
         }
     }
 };
@@ -59,15 +60,23 @@ static inline
 int
 get_pixel_pos(uint8_t x, uint8_t y)
 {
-	int map[8][8] = {
-		{7 ,6 ,5 ,4 ,3 ,2 ,1 ,0 },
-		{8 ,9 ,10,11,12,13,14,15},
-		{23,22,21,20,19,18,17,16},
-		{24,25,26,27,28,29,30,31},
-		{39,38,37,36,35,34,33,32},
-		{40,41,42,43,44,45,46,47},
-		{55,54,53,52,51,50,49,48},
-		{56,57,58,59,60,61,62,63}
+	int map[4][16] = {
+		{ 0, 31, 32, 63},
+		{ 1, 30, 33, 62},
+		{ 2, 29, 34, 61},
+		{ 3, 28, 35, 60},
+		{ 4, 27, 36, 59},
+		{ 5, 26, 37, 58},
+		{ 6, 25, 38, 57},
+		{ 7, 24, 39, 56},
+		{ 8, 23, 40, 55},
+		{ 9, 22, 41, 54},
+		{10, 21, 42, 53},
+		{11, 20, 43, 52},
+		{12, 19, 44, 51},
+		{13, 18, 45, 50},
+		{14, 17, 46, 49},
+		{15, 16, 47, 48},
 	};
 
 	return map[x][y];
@@ -75,9 +84,9 @@ get_pixel_pos(uint8_t x, uint8_t y)
 
 static inline
 void
-set_pixel_color(int pixel, int r, int g, int b)
+set_pixel_color(int pixel, int w, int r, int g, int b)
 {
-    ledstring.channel[0].leds[pixel] = (r << 16) | (g << 8) | b;
+    ledstring.channel[0].leds[pixel] = (w << 24) | (r << 16) | (g << 8) | b;
 }
 
 
@@ -124,7 +133,7 @@ init_unicorn_hat(void)
 	int i;
 	struct sigaction sa;
 
-	for (i = 0; i < 64; i++) {
+	for (i = 0; i < LED_COUNT; i++) {
 		memset(&sa, 0, sizeof(sa));
 		sa.sa_handler = unicornd_exit;
 		sigaction(i, &sa, NULL);
@@ -159,6 +168,7 @@ init_unicorn_hat(void)
 }
 
 typedef struct col_s {
+	uint8_t w;
 	uint8_t r;
 	uint8_t g;
 	uint8_t b;
@@ -235,7 +245,7 @@ handle_client(int client_socket) {
 	pos_t pos;
 	col_t col;
 
-	col_t pixels[64];
+	col_t pixels[LED_COUNT];
 	
 	int x, y;
 
@@ -255,16 +265,16 @@ handle_client(int client_socket) {
 				recv_or_return(client_socket, &pos, sizeof(pos_t), 0);
 				recv_or_return(client_socket, &col, sizeof(col_t), 0);
 
-				set_pixel_color(get_pixel_pos(pos.x, pos.y), col.r, col.g, col.b);
+				set_pixel_color(get_pixel_pos(pos.x, pos.y), col.w, col.r, col.g, col.b);
 				break;
 
 			case UNICORND_CMD_SET_ALL_PIXELS:
-				recv_or_return(client_socket, &pixels, 64 * sizeof(col_t), 0);
+				recv_or_return(client_socket, &pixels, LED_COUNT * sizeof(col_t), 0);
 
-				for (x = 0; x < 8; x++) {
-					for (y = 0; y < 8; y++) {
-						col_t *col = &pixels[x * 8 + y];
-						set_pixel_color(get_pixel_pos(x, y), col->r, col->g, col->b);
+				for (x = 0; x < WIDTH; x++) {
+					for (y = 0; y < HEIGHT; y++) {
+						col_t *col = &pixels[x * HEIGHT + y];
+						set_pixel_color(get_pixel_pos(x, y), col->w, col->r, col->g, col->b);
 					}
 				}
 

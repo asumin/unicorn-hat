@@ -8,6 +8,10 @@ UNICORND_CMD_SET_PIXEL      = 1
 UNICORND_CMD_SET_ALL_PIXELS = 2
 UNICORND_CMD_SHOW           = 3
 
+WIDTH = 4
+HEIGHT = 16
+LED_COUNT = WIDTH * HEIGHT
+
 sock = None
 
 def connect():
@@ -18,11 +22,11 @@ def connect():
 def set_brightness(val):
     sock.send(struct.pack('=cc',*[chr(UNICORND_CMD_SET_BRIGHTNESS), val]))
 
-def set_pixel(x,y,r,g,b):
-    sock.send(''.join(chr(x) for x in [UNICORND_CMD_SET_PIXEL, x, y, r, g, b]))
+def set_pixel(x,y,w,r,g,b):
+    sock.send(''.join(chr(x) for x in [UNICORND_CMD_SET_PIXEL, x, y, w, r, g, b]))
 
 def clear():
-    set_all_pixels([0,0,0]*64)
+    set_all_pixels([0,0,0]*LED_COUNT)
 
 def set_all_pixels(pixels):
     sock.send(chr(UNICORND_CMD_SET_ALL_PIXELS) + ''.join(chr(x) for x in pixels))
