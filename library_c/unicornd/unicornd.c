@@ -97,7 +97,7 @@ clear_led_buffer(void)
     int i;
 
     for(i = 0; i < LED_COUNT; i++){
-        set_pixel_color(i, 0, 0, 0);
+        set_pixel_color(i, 0, 0, 0, 0);
     }
 }
 
