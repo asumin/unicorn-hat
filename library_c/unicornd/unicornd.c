@@ -32,7 +32,7 @@
 #include "ws2811.h"
 
 #define TARGET_FREQ    WS2811_TARGET_FREQ
-#define GPIO_PIN       18
+#define GPIO_PIN       10
 #define DMA            10
 
 #define WIDTH          4
