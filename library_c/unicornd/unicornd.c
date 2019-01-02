@@ -31,7 +31,7 @@
 
 #include "ws2811.h"
 
-#define TARGET_FREQ    WS2811_TARGET_FREQ
+#define TARGET_FREQ    1200000	// WS2811_TARGET_FREQ
 #define GPIO_PIN       10
 #define DMA            10
 
@@ -51,7 +51,7 @@ ws2811_t ledstring =
             .count      = LED_COUNT,
             .invert     = 0,
             .brightness = 255,
-            .strip_type = SK6812_STRIP_RGBW,
+            .strip_type = SK6812_STRIP_GRBW,
         }
     }
 };
