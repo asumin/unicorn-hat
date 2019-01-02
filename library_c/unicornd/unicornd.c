@@ -51,7 +51,7 @@ ws2811_t ledstring =
             .count      = LED_COUNT,
             .invert     = 0,
             .brightness = 255,
-			.strip_type = SK6812_STRIP_RGBW,
+            .strip_type = SK6812_STRIP_RGBW,
         }
     }
 };
